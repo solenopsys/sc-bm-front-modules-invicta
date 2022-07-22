@@ -1,0 +1,8 @@
+apiVersion: v2
+name: alexstorm-front-modules
+version: 0.1.8
+description: Front modules
+icon: "http://alexstorm.solenopsys.org/apps/assets/front-modules.svg"
+
+
+

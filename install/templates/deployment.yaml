@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name:  {{ .Values.fullName }}
+spec:
+  serviceName: {{ .Values.fullName }}
+  replicas: {{ .Values.replicasCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.selectorLabel }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullName}}
+    spec:
+      containers:
+        - name: {{ .Values.containers.http_server.name}}
+          image: {{ .Values.containers.http_server.image}}
+          imagePullPolicy: {{ .Values.containers.http_server.pullPolicy}}
+          ports:
+            - containerPort:  {{ .Values.service.port}}
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name:  {{ .Values.storage.volumeName }}
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: baseDir
+              value: "/modules/"
+            - name: server.Host
+              value: "localhost"
+            - name: server.Port
+              value:   "{{ .Values.service.port}}"
+
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: {{ .Values.storage.volumeName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.volumeName }}
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.storage.volumeName }}
+        annotations:
+          volume.alpha.kubernetes.io/storage-class: anything
+      spec:
+        accessModes:
+          - {{ .Values.storage.accessModes }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.storageSize }}

@@ -1,0 +1,18 @@
+replicasCount: 1
+fullName: "front-modules"
+selectorLabel:  "front-modules"
+
+service:
+  port: 80
+
+storage:
+  volumeName: front-volume
+  storageSize: 300Mi
+  accessModes: "ReadWriteOnce"
+
+containers:
+  http_server:
+    name: http
+    image: registry.alexstorm.solenopsys.org/alexstorm-front-modules
+    pullPolicy: Always
+
