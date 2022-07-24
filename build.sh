@@ -14,11 +14,11 @@ helm_build_push(){
 REGISTRY=registry.alexstorm.solenopsys.org
 NAME=alexstorm-front-modules
 ARCHS="linux/amd64,linux/arm64"
-VER=0.1.4
+VER=0.1.16
 
 
-#build_push
-helm_build_push
+build_push
+#helm_build_push
 
 
 

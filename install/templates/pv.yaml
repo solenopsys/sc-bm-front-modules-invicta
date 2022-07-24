@@ -2,13 +2,17 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name:  {{ .Values.storage.volumeName }}
-  labels:
-      app: {{ .Values.selectorLabel }}
+  annotations:
+    pv.kubernetes.io/provisioned-by: rancher.io/local-path
+  finalizers:
+    - kubernetes.io/pv-protection
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ .Values.storage.accessModes }}
   capacity:
-    storage: 300Mi
+    storage:  {{ .Values.storage.storageSize }}
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: local-path
+  hostPath:
+    path: {{ .Values.storage.hostPath }}
+  storageClassName: {{ .Values.storage.storageClass }}
   volumeMode: Filesystem

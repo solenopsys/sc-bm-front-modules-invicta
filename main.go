@@ -15,26 +15,32 @@ type FrontModule struct {
 }
 
 func modulesHandler(w http.ResponseWriter, r *http.Request) {
-	var modulesArray []FrontModule
+	var modulesArray = make([]FrontModule, 0)
+
+	log.Println("REQUEST ", r.GetBody)
 
 	baseDir := os.Getenv("baseDir")
 
 	files, err := ioutil.ReadDir(baseDir)
 	if err != nil {
-		log.Fatal(err)
-	}
-	for _, f := range files {
-		if f.IsDir() {
-			subFiles, err := ioutil.ReadDir(baseDir + "/" + f.Name())
-			if err != nil {
-				log.Fatal(err)
-			}
-			for _, subFile := range subFiles {
-				if f.IsDir() {
-					var item FrontModule
-					item.Name = f.Name() + "/" + subFile.Name()
-					modulesArray = append(modulesArray, item)
+		log.Println("DIR NOT FOUND ", baseDir)
+	} else {
+		for _, f := range files {
+			if f.IsDir() {
+				subDir := baseDir + "/" + f.Name()
+				subFiles, err := ioutil.ReadDir(subDir)
+				if err != nil {
+					log.Println("SUB DIR NOT FOUND ", subDir)
+				} else {
+					for _, subFile := range subFiles {
+						if f.IsDir() {
+							var item FrontModule
+							item.Name = f.Name() + "/" + subFile.Name()
+							modulesArray = append(modulesArray, item)
+						}
+					}
 				}
+
 			}
 		}
 	}
@@ -42,22 +48,40 @@ func modulesHandler(w http.ResponseWriter, r *http.Request) {
 	result, _ := json.Marshal(modulesArray)
 
 	w.Header().Set("Content-Type", "application/json")
+	setCorsHeaders(w)
 	w.WriteHeader(http.StatusOK)
 	w.Write(result)
 
+}
+
+func setCorsHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+func cors(fs http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// do your cors stuff
+		// return if you do not want the FileServer handle a specific request
+		setCorsHeaders(w)
+		fs.ServeHTTP(w, r)
+	}
 }
 
 func main() {
 	baseDir := os.Getenv("baseDir")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/list", modulesHandler)
-	pr := "/modules/"
-	r.PathPrefix(pr).Handler(http.StripPrefix(pr, http.FileServer(http.Dir(baseDir))))
+	r.HandleFunc("/fm/list", modulesHandler)
+	pr := "/fm/modules/"
+	r.PathPrefix(pr).Handler(http.StripPrefix(pr, cors(http.FileServer(http.Dir(baseDir)))))
 	http.Handle("/", r)
 
 	host := os.Getenv("server.Host")
 	port := os.Getenv("server.Port")
+
+	log.Println("START SERVER host,port ", host, " ", port)
+	log.Println("DIR ", baseDir)
 	addr := host + ":" + port
 
 	srv := &http.Server{

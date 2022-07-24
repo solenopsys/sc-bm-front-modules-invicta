@@ -7,8 +7,11 @@ service:
 
 storage:
   volumeName: front-volume
+  volumeClimeName:  front-pvc
   storageSize: 300Mi
   accessModes: "ReadWriteOnce"
+  hostPath: "/opt/front-volume"
+  storageClass: "local-path"
 
 containers:
   http_server:
