@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM --platform=$BUILDPLATFORM  golang:1.18.3-buster
 
 ARG TARGETARCH
