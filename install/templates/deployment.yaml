@@ -26,7 +26,7 @@ spec:
               mountPath: /volume
           env:
             - name: baseDir
-              value: "/volume/dist/apps/modules/"
+              value: "/volume/dist/modules/"
             - name: server.Host
               value: "0.0.0.0"
             - name: server.Port
